@@ -1,0 +1,2 @@
+# azuretemplate-check
+Testing Template
