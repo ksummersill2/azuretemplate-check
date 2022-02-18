@@ -1,0 +1,69 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "string",
+            "metadata": {
+                "description": "Location of all resources"
+            }
+        },
+        //  NSG
+        "NSGs": {
+            "type": "array",
+            "metadata": {
+                "description": "An object array of Network Security Groups attached to the main VNET"
+            }
+        },
+        "enableDiagnosticSetting": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": ""
+            }
+        },
+        "logs": {
+            "type": "array",
+            "defaultValue": []
+        }
+        // "logAnalyticsWorkspace": {
+        //     "type": "string",
+        //     "defaultValue": "x"
+        // }
+    },
+    "variables": {},
+    "resources": [
+        // Array of Network Security Groups with Ingress and Egress
+        {
+            "name": "[parameters('NSGs')[copyIndex('nsgCopy')].name]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-02-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": "[parameters('NSGs')[copyIndex('nsgCopy')].properties.securityRules]"
+            },
+            "copy": {
+                "name": "nsgCopy",
+                "count": "[length(parameters('NSGs'))]"
+            }
+        }
+        // {
+        //     "condition": "[parameters('enableDiagnosticSetting')]",
+        //     "name": "[concat(parameters('NSGs')[copyIndex('diagnosticCopy')].name, '/Microsoft.Insights/', concat('diag-', parameters('NSGs')[copyIndex('diagnosticCopy')].name))]",
+        //     "type": "Microsoft.Network/networkSecurityGroups/providers/diagnosticSettings",
+        //     "apiVersion": "2017-05-01-preview",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NSGs')[copyIndex('diagnosticCopy')].name)]"
+        //     ],
+        //     "properties": {
+        //         "logs": "[parameters('logs')]"
+        //         "workspaceId": "[resourceId('Microsoft.operationalinsights/workspaces', parameters('logAnalyticsWorkspace'))]"
+        //     },
+        //     "copy": {
+        //         "name": "diagnosticCopy",
+        //         "count": "[length(parameters('NSGs'))]"
+        //     }
+        // }
+    ]
+}
